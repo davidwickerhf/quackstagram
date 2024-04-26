@@ -1,0 +1,49 @@
+@startuml
+' Define skin parameters for a clearer diagram
+skinparam linetype ortho
+
+entity "Users" {
+  *username : VARCHAR(255) <<PK>>
+  password_hashed : VARCHAR(255)
+  bio : TEXT
+  timestamp : TIMESTAMP
+  picturePath : TEXT
+}
+
+entity "Posts" {
+  *key : INT <<PK>>
+  username : VARCHAR(255) [FK]
+  description : TEXT
+  path : TEXT
+}
+
+entity "Following" {
+  *username_from : VARCHAR(255) <<PK>>
+  *username_to : VARCHAR(255) <<PK>>
+  timestamp : TIMESTAMP
+}
+
+entity "Likes" {
+  *username_from : VARCHAR(255) <<PK>>
+  *postKey : INT <<PK>>
+  timestamp : TIMESTAMP
+}
+
+entity "Comments" {
+  *key : INT <<PK>>
+  username_from : VARCHAR(255) [FK]
+  text : TEXT
+  timestamp : TIMESTAMP
+  postKey : INT [FK]
+}
+
+' Define relationships
+Users ||--o{ Posts : "has"
+Users ||--o{ Following : "follows"
+Users ||..o{ Following : "is followed by"
+Users ||--o{ Likes : "likes"
+Users ||--o{ Comments : "comments"
+Posts ||--o{ Comments : "includes"
+Posts ||--o{ Likes : "receives likes"
+
+@enduml
