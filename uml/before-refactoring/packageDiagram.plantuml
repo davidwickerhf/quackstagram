@@ -1,0 +1,89 @@
+@startuml PackageDiagram
+
+package "OOM Project" {
+    class Picture {
+        - imagePath: String
+        - caption: String
+        - likesCount: int
+        - comments: String[]
+
+        + Picture(imagePath: String, caption: String)
+        + addComment(String)
+        + like()
+        + getImagePath() : String
+        + getCaption() : String
+        + getLikesCount() : int
+        + getComments() : String[]
+    }
+
+    class User {
+        - username : String
+        - bio : String
+        - password : String
+        - postsCount : int
+        - followersCount : int
+        - followingCount : int
+        - pictures : Picture[]
+
+        + User(username: String, bio: String, password: String)
+        + User(username: String)
+        + addPicture(Picture)
+        + getUsername() : String
+        + getBio() : String
+        + setBio(String)
+        + getPostsCount() : int
+        + getFollowersCount() : int
+        + getFollowingCount() : int
+        + getPictures() : Picture[]
+        + setFollowersCount(int)
+        + setFollowingCount(int)
+        + setPostCount(int)
+        + toString() : String
+    }
+
+    class UserRelationshipManager {
+        - followersFilePath: String = "data/followers.txt" {readOnly}
+
+        + followUser(follower: String, followed: String)
+        + isAlreadyFollowing(follower: St ring, followed: String) : boolean
+        + getFollowers(username: String) : String[]
+        + getFollowing(username: String) : String[]
+    }
+
+    class ImageLikesManager {
+        - likesFilePath: String = "data/likes.txt" {readOnly}
+
+        + likeImage(username: String, imageId: String)
+        + readLikes(): Map<String, Set<String>>
+        + saveLikes(likesMap: Map<String, Set<String>>)
+    }
+
+    class ExploreUI {
+        + ExploreUI()
+    }
+
+    class ImageUploadUI {
+        + ImageUploadUI()
+    }
+
+    class InstagramProfileUI {
+        + InstagramProfileUI(user: User)
+    }
+
+    class NotificationsUI {
+        + NotificationsUI()
+    }
+
+    class QuakstagramHomeUI {
+        + QuakstagramHomeUI()
+    }
+
+    class SignInUI {
+        + SignInUI()
+    }
+
+    class SignUpUI {
+        + SignUpUI()
+    }
+}
+@enduml

@@ -1,0 +1,24 @@
+@startuml ObjectDiagram
+object User1 {
+  name = "Alice"
+  studentId = "S1001"
+}
+object User2 {
+  name = "Bob"
+  studentId = "S1002"
+}
+
+
+object Picture1 {
+  title = "Computer Science 101"
+  code = "CS101"
+}
+object Picture2 {
+  title = "Mathematics 101"
+  code = "MATH101"
+}
+
+Student1 --> Course1 : enrolledIn
+Student2 --> Course1 : enrolledIn
+Student1 --> Course2 : enrolledIn
+@enduml
