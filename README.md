@@ -4,50 +4,53 @@
 
 ### Prerequisites
 
+1. **Install Java Development Kit (JDK)**:
+
+   - Ensure you have JDK 11 or higher installed.
+   - You can download it from [Oracle's website](https://www.oracle.com/java/technologies/javase-downloads.html).
+
+2. **Install MySQL**:
+
+   - Download and install MySQL server from [MySQL's website](https://dev.mysql.com/downloads/).
+   - Ensure the MySQL server is running.
+
+3. **Install Gradle**:
+   - Follow the installation instructions on [Gradle's website](https://gradle.org/install/).
+
 ### Database Setup
 
-- **Database Creation**:
+2. **Make the script executable**:
 
-  - Creates the `quackstagram` database.
-  - Creates the `quack_user` user with the specified password.
-  - Grants all privileges on the `quackstagram` database to `quack_user`.
-
-- **Schema Definition**:
-
-  - Creates the `User`, `Post`, `Comment`, `Like`, and `Follow` tables with the specified columns and constraints.
-
-- **Views**:
-
-  - `UserActivity`: Aggregates user activity including post and comment counts.
-  - `PopularPosts`: Lists posts sorted by the number of likes.
-  - `SystemAnalytics`: Provides overall counts for users, posts, comments, likes, and follows.
-
-- **Indexes**:
-
-  - `idx_user_username`: Index on the `username` column of the `User` table.
-  - `idx_post_content`: Index on the `content` column of the `Post` table (first 100 characters).
-
-- **Procedures and Functions**:
-
-  - `UpdatePostCount`: Procedure to update the post count for a user.
-  - `GetUserPostCount`: Function to get the post count for a user.
-
-- **Triggers**:
-  - `after_insert_post`: Trigger that calls the `UpdatePostCount` procedure after a new post is inserted.
-  - `before_insert_comment`: Trigger that sets the `createdAt` timestamp before a new comment is inserted.
-
-### Running the Script
-
-2. **Make the script executable:**
    ```sh
    chmod +x setup_mysql.sh
    ```
-3. **Run the script:**
+
+3. **Run the script**:
    ```sh
    ./setup_mysql.sh
    ```
 
 This script will set up the MySQL database, user, schema, views, indexes, procedures, functions, and triggers.
+
+### Application Setup
+
+1. **Clone the repository**:
+
+   ```sh
+   git clone https://github.com/your-username/quackstagram.git
+   cd quackstagram
+   ```
+
+2. **Build the project**:
+
+   ```sh
+   gradle build
+   ```
+
+3. **Run the application**:
+   ```sh
+   gradle run
+   ```
 
 ## Java Models
 
@@ -180,7 +183,9 @@ CREATE TABLE IF NOT EXISTS Follow (
     FOREIGN KEY (followingId) REFERENCES User(userId)
 );
 
--- Create Views
+--
+
+ Create Views
 CREATE VIEW UserActivity AS
 SELECT User.username, COUNT(Post.postId) AS postCount, COUNT(Comment.commentId) AS commentCount
 FROM User
@@ -235,7 +240,6 @@ BEGIN
 END //
 
 DELIMITER ;
-
 ```
 
 ## Database Connection
@@ -274,6 +278,7 @@ public class UserDAO {
         this.connection = DatabaseConnection.getConnection();
     }
 
+    // Example method, view UserDAO.java
     public void createUser(User user) throws SQLException {
         String sql = "INSERT INTO User (username, email, hashedPassword, bio, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -291,71 +296,6 @@ public class UserDAO {
             }
         }
     }
-
-    public User findUser(Long userId) throws SQLException {
-        String sql = "SELECT * FROM User WHERE userId = ?";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setLong(1, userId);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    User user = new User();
-                    user.setUserId(resultSet.getLong("userId"));
-                    user.setUsername(resultSet.getString("username"));
-                    user.setEmail(resultSet.getString("email"));
-                    user.setHashedPassword(resultSet.getString("hashedPassword"));
-                    user.setBio(resultSet.getString("bio"));
-                    user.setCreatedAt(resultSet.getTimestamp("createdAt"));
-                    user.setUpdatedAt(resultSet.getTimestamp("updatedAt"));
-                    return user;
-                }
-            }
-        }
-        return null;
-    }
-
-    public void updateUser(User user) throws SQLException {
-        String sql = "UPDATE User SET username = ?, email = ?, hashedPassword = ?, bio = ?, updatedAt = ? WHERE userId = ?";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, user.getUsername());
-            statement.setString(2, user.getEmail());
-            statement.setString(3, user.getHashedPassword());
-            statement.setString(4, user.getBio());
-            statement.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
-            statement.setLong(6, user.getUserId());
-            statement.executeUpdate();
-        }
-    }
-
-    public void deleteUser(Long userId) throws SQLException {
-        String sql = "DELETE FROM User WHERE userId = ?";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setLong(1, userId);
-            statement.executeUpdate();
-        }
-    }
-
-    public List<User> findAllUsers() throws SQLException {
-        List<User> users = new ArrayList<>();
-        String sql = "SELECT * FROM User";
-        try (Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(sql)) {
-            while (resultSet.next()) {
-                User user = new User();
-                user.setUserId(resultSet.getLong("userId"));
-                user.setUsername(resultSet.getString("username"));
-                user.setEmail(resultSet.getString("email"));
-                user.setHashedPassword(resultSet.getString("hashedPassword"));
-                user.setBio(resultSet.getString("bio"));
-                user.setCreatedAt(resultSet.getTimestamp("createdAt"));
-                user.setUpdatedAt(resultSet.getTimestamp("updatedAt"));
-                users.add(user);
-            }
-        }
-        return users;
-    }
-
-    // Similar CRUD methods for Post, Comment, Like, Follow
-    // ...
 }
 ```
 
@@ -395,36 +335,6 @@ public class Main {
 
 ## Proof of 3NF
 
-### User Table
-
-1. **First Normal Form (1NF):** The table is in 1NF since all values are atomic and there are no repeating groups.
-2. **Second Normal Form (2NF):** The table is in 2NF since there are no partial dependencies (all non-key attributes are fully dependent on the primary key).
-3. **Third Normal Form (3NF):** The table is in 3NF since there are no transitive dependencies (all non-key attributes are directly dependent on the primary key).
-
-### Post Table
-
-1. **First Normal Form (1NF):** The table is in 1NF since all values are atomic and there are no repeating groups.
-2. **Second Normal Form (2NF):** The table is in 2NF since there are no partial dependencies (all non-key attributes are fully dependent on the primary key).
-3. **Third Normal Form (3NF):** The table is in 3NF since there are no transitive dependencies (all non-key attributes are directly dependent on the primary key).
-
-### Comment Table
-
-1. **First Normal Form (1NF):** The table is in 1NF since all values are atomic and there are
-
-no repeating groups. 2. **Second Normal Form (2NF):** The table is in 2NF since there are no partial dependencies (all non-key attributes are fully dependent on the primary key). 3. **Third Normal Form (3NF):** The table is in 3NF since there are no transitive dependencies (all non-key attributes are directly dependent on the primary key).
-
-### Like Table
-
-1. **First Normal Form (1NF):** The table is in 1NF since all values are atomic and there are no repeating groups.
-2. **Second Normal Form (2NF):** The table is in 2NF since there are no partial dependencies (all non-key attributes are fully dependent on the primary key).
-3. **Third Normal Form (3NF):** The table is in 3NF since there are no transitive dependencies (all non-key attributes are directly dependent on the primary key).
-
-### Follow Table
-
-1. **First Normal Form (1NF):** The table is in 1NF since all values are atomic and there are no repeating groups.
-2. **Second Normal Form (2NF):** The table is in 2NF since there are no partial dependencies (all non-key attributes are fully dependent on the primary key).
-3. **Third Normal Form (3NF):** The table is in 3NF since there are no transitive dependencies (all non-key attributes are directly dependent on the primary key).
-
 All tables (User, Post, Comment, Like, Follow) are in 3NF because:
 
 - Each table is already in 1NF (all attributes are atomic).
@@ -433,9 +343,9 @@ All tables (User, Post, Comment, Like, Follow) are in 3NF because:
 
 ## ERD Diagram
 
-### Rendered EDR
+### Rendered ERD
 
-![Image Description](path/to/image.jpg)
+![ERD](/schema.png)
 
 ### PlantUML Code
 
