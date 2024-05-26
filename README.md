@@ -265,9 +265,7 @@ CREATE TABLE IF NOT EXISTS Follow (
     FOREIGN KEY (followingId) REFERENCES User(userId)
 );
 
---
-
- Create Views
+--Create Views
 CREATE VIEW UserActivity AS
 SELECT User.username, COUNT(Post.postId) AS postCount, COUNT(Comment.commentId) AS commentCount
 FROM User
