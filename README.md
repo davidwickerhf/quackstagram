@@ -486,3 +486,253 @@ Post ||--o{ Comment : "has"
 Post ||--o{ Like : "is liked"
 @enduml
 ```
+
+## Profit Maximization Queries
+
+Based on the provided MySQL schema, here are the SQL queries to answer each of the questions:
+
+1. **List all users who have more than X followers where X can be any integer value.**
+
+   ```sql
+   SELECT u.username, COUNT(f.followerId) AS follower_count
+   FROM User u
+   JOIN Follow f ON u.userId = f.followingId
+   GROUP BY u.userId
+   HAVING COUNT(f.followerId) > X;
+   ```
+
+2. **Show the total number of posts made by each user.**
+
+   ```sql
+   SELECT u.username, COUNT(p.postId) AS total_posts
+   FROM User u
+   LEFT JOIN Post p ON u.userId = p.userId
+   GROUP BY u.userId;
+   ```
+
+3. **Find all comments made on a particular user’s post.**
+
+   ```sql
+   SELECT c.*
+   FROM Comment c
+   JOIN Post p ON c.postId = p.postId
+   WHERE p.userId = (SELECT userId FROM User WHERE username = 'particular_username');
+   ```
+
+4. **Display the top X most liked posts.**
+
+   ```sql
+   SELECT p.*, COUNT(l.likeId) AS like_count
+   FROM Post p
+   LEFT JOIN `Like` l ON p.postId = l.postId
+   GROUP BY p.postId
+   ORDER BY like_count DESC
+   LIMIT X;
+   ```
+
+5. **Count the number of posts each user has liked.**
+
+   ```sql
+   SELECT u.username, COUNT(l.likeId) AS total_likes
+   FROM User u
+   LEFT JOIN `Like` l ON u.userId = l.userId
+   GROUP BY u.userId;
+   ```
+
+6. **List all users who haven’t made a post yet.**
+
+   ```sql
+   SELECT u.username
+   FROM User u
+   LEFT JOIN Post p ON u.userId = p.userId
+   WHERE p.postId IS NULL;
+   ```
+
+7. **List users who follow each other.**
+
+   ```sql
+   SELECT u1.username AS user1, u2.username AS user2
+   FROM Follow f1
+   JOIN Follow f2 ON f1.followerId = f2.followingId AND f1.followingId = f2.followerId
+   JOIN User u1 ON f1.followerId = u1.userId
+   JOIN User u2 ON f1.followingId = u2.userId;
+   ```
+
+8. **Show the user with the highest number of posts.**
+
+   ```sql
+   SELECT u.username, COUNT(p.postId) AS total_posts
+   FROM User u
+   LEFT JOIN Post p ON u.userId = p.userId
+   GROUP BY u.userId
+   ORDER BY total_posts DESC
+   LIMIT 1;
+   ```
+
+9. **List the top X users with the most followers.**
+
+   ```sql
+   SELECT u.username, COUNT(f.followerId) AS follower_count
+   FROM User u
+   LEFT JOIN Follow f ON u.userId = f.followingId
+   GROUP BY u.userId
+   ORDER BY follower_count DESC
+   LIMIT X;
+   ```
+
+10. **Find posts that have been liked by all users.**
+
+    ```sql
+    SELECT p.*
+    FROM Post p
+    JOIN `Like` l ON p.postId = l.postId
+    GROUP BY p.postId
+    HAVING COUNT(DISTINCT l.userId) = (SELECT COUNT(*) FROM User);
+    ```
+
+11. **Display the most active user (based on posts, comments, and likes).**
+
+    ```sql
+    SELECT u.username,
+           (COUNT(p.postId) + COUNT(c.commentId) + COUNT(l.likeId)) AS activity_count
+    FROM User u
+    LEFT JOIN Post p ON u.userId = p.userId
+    LEFT JOIN Comment c ON u.userId = c.userId
+    LEFT JOIN `Like` l ON u.userId = l.userId
+    GROUP BY u.userId
+    ORDER BY activity_count DESC
+    LIMIT 1;
+    ```
+
+12. **Find the average number of likes per post for each user.**
+
+    ```sql
+    SELECT u.username, AVG(like_count) AS avg_likes_per_post
+    FROM (
+        SELECT p.userId, COUNT(l.likeId) AS like_count
+        FROM Post p
+        LEFT JOIN `Like` l ON p.postId = l.postId
+        GROUP BY p.postId
+    ) AS post_likes
+    JOIN User u ON post_likes.userId = u.userId
+    GROUP BY u.userId;
+    ```
+
+13. **Show posts that have more comments than likes.**
+
+    ```sql
+    SELECT p.*
+    FROM Post p
+    LEFT JOIN Comment c ON p.postId = c.postId
+    LEFT JOIN `Like` l ON p.postId = l.postId
+    GROUP BY p.postId
+    HAVING COUNT(c.commentId) > COUNT(l.likeId);
+    ```
+
+14. **List the users who have liked every post of a specific user.**
+
+    ```sql
+    SELECT u.username
+    FROM User u
+    WHERE NOT EXISTS (
+        SELECT p.postId
+        FROM Post p
+        WHERE p.userId = (SELECT userId FROM User WHERE username = 'specific_username')
+        AND NOT EXISTS (
+            SELECT l.likeId
+            FROM `Like` l
+            WHERE l.postId = p.postId AND l.userId = u.userId
+        )
+    );
+    ```
+
+15. **Display the most popular post of each user (based on likes).**
+
+    ```sql
+    SELECT p1.*
+    FROM Post p1
+    LEFT JOIN `Like` l1 ON p1.postId = l1.postId
+    LEFT JOIN (
+        SELECT p.userId, MAX(like_count) AS max_likes
+        FROM (
+            SELECT p.userId, p.postId, COUNT(l.likeId) AS like_count
+            FROM Post p
+            LEFT JOIN `Like` l ON p.postId = l.postId
+            GROUP BY p.userId, p.postId
+        ) AS user_posts
+        GROUP BY user_posts.userId
+    ) AS max_likes_per_user ON p1.userId = max_likes_per_user.userId
+                           AND COUNT(l1.likeId) = max_likes_per_user.max_likes
+    GROUP BY p1.userId;
+    ```
+
+16. **Find the user(s) with the highest ratio of followers to following.**
+
+    ```sql
+    SELECT u.username,
+           (follower_count / following_count) AS follower_following_ratio
+    FROM User u
+    JOIN (
+        SELECT u.userId,
+               COUNT(DISTINCT f1.followerId) AS follower_count,
+               COUNT(DISTINCT f2.followingId) AS following_count
+        FROM User u
+        LEFT JOIN Follow f1 ON u.userId = f1.followingId
+        LEFT JOIN Follow f2 ON u.userId = f2.followerId
+        GROUP BY u.userId
+    ) AS counts ON u.userId = counts.userId
+    ORDER BY follower_following_ratio DESC
+    LIMIT 1;
+    ```
+
+17. **Show the month with the highest number of posts made.**
+
+    ```sql
+    SELECT DATE_FORMAT(createdAt, '%Y-%m') AS month, COUNT(postId) AS post_count
+    FROM Post
+    GROUP BY month
+    ORDER BY post_count DESC
+    LIMIT 1;
+    ```
+
+18. **Identify users who have not interacted with a specific user’s posts.**
+
+    ```sql
+    SELECT u.username
+    FROM User u
+    WHERE u.userId NOT IN (
+        SELECT l.userId
+        FROM `Like` l
+        JOIN Post p ON l.postId = p.postId
+        WHERE p.userId = (SELECT userId FROM User WHERE username = 'specific_username')
+    )
+    AND u.userId NOT IN (
+        SELECT c.userId
+        FROM Comment c
+        JOIN Post p ON c.postId = p.postId
+        WHERE p.userId = (SELECT userId FROM User WHERE username = 'specific_username')
+    );
+    ```
+
+19. **Display the user with the greatest increase in followers in the last X days.**
+
+    ```sql
+    SELECT u.username, (COUNT(f1.followerId) - COUNT(f2.followerId)) AS follower_increase
+    FROM User u
+    LEFT JOIN Follow f1 ON u.userId = f1.followingId AND f1.createdAt > (CURRENT_DATE - INTERVAL X DAY)
+    LEFT JOIN Follow f2 ON u.userId = f2.followingId AND f2.createdAt <= (CURRENT_DATE - INTERVAL X DAY)
+    GROUP BY u.userId
+    ORDER BY follower_increase DESC
+    LIMIT 1;
+    ```
+
+20. **Find users who are followed by more than X% of the platform users.**
+    ```sql
+    SELECT u.username
+    FROM User u
+    JOIN Follow f ON u.userId = f.followingId
+    GROUP BY u.userId
+    HAVING (COUNT(f.followerId) / (SELECT COUNT(*) FROM User)) * 100 > X;
+    ```
+
+Adjust the `X` values and `specific_username` to test on specific values.
