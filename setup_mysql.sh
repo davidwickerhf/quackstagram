@@ -9,6 +9,34 @@ DB_NAME="quackstagram"
 DB_USER="quack_user"
 DB_PASSWORD="quack_password"
 
+# Start MySQL service (platform-specific)
+start_mysql_service() {
+  case "$OSTYPE" in
+    linux-gnu*)
+      if [ -x "$(command -v systemctl)" ]; then
+        sudo systemctl start mysql
+      elif [ -x "$(command -v service)" ]; then
+        sudo service mysql start
+      fi
+      ;;
+    darwin*)
+      if [ -x "$(command -v brew)" ]; then
+        brew services start mysql
+      fi
+      ;;
+    cygwin*|msys*|mingw*)
+      net start mysql
+      ;;
+    *)
+      echo "Unsupported platform: $OSTYPE"
+      exit 1
+      ;;
+  esac
+}
+
+# Start MySQL service
+start_mysql_service
+
 # SQL commands
 SQL_COMMANDS=$(cat <<EOF
 CREATE DATABASE IF NOT EXISTS $DB_NAME;
@@ -81,7 +109,7 @@ LEFT JOIN Comment ON User.userId = Comment.userId
 GROUP BY User.username;
 
 CREATE VIEW PopularPosts AS
-SELECT Post.postId, Post.content, COUNT(Like.likeId) AS likeCount
+SELECT Post.postId, Post.content, COUNT(\`Like\`.likeId) AS likeCount
 FROM Post
 LEFT JOIN \`Like\` ON Post.postId = \`Like\`.postId
 GROUP BY Post.postId

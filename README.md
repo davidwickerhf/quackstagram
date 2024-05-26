@@ -4,18 +4,100 @@
 
 ### Prerequisites
 
-1. **Install Java Development Kit (JDK)**:
+Here are the commands you need to install the required software for different platforms:
 
-   - Ensure you have JDK 11 or higher installed.
-   - You can download it from [Oracle's website](https://www.oracle.com/java/technologies/javase-downloads.html).
+#### Install Java Development Kit (JDK)
 
-2. **Install MySQL**:
+**Windows**:
 
-   - Download and install MySQL server from [MySQL's website](https://dev.mysql.com/downloads/).
-   - Ensure the MySQL server is running.
+1. Download and install from Oracle's website manually or use Chocolatey:
+   ```sh
+   choco install jdk11 -y
+   ```
 
-3. **Install Gradle**:
-   - Follow the installation instructions on [Gradle's website](https://gradle.org/install/).
+**Mac**:
+
+1. Using Homebrew:
+   ```sh
+   brew install openjdk@11
+   ```
+
+**Linux**:
+
+1. Using APT (Ubuntu/Debian):
+   ```sh
+   sudo apt update && sudo apt install openjdk-11-jdk -y
+   ```
+2. Using YUM (CentOS/RHEL):
+   ```sh
+   sudo yum install java-11-openjdk-devel -y
+   ```
+
+#### Install MySQL
+
+**Windows**:
+
+1. Download and install from MySQL's website manually or use Chocolatey:
+   ```sh
+   choco install mysql -y
+   ```
+2. Start MySQL service:
+   ```sh
+   net start mysql
+   ```
+
+**Mac**:
+
+1. Using Homebrew:
+   ```sh
+   brew install mysql
+   ```
+2. Start MySQL service:
+   ```sh
+   brew services start mysql
+   ```
+
+**Linux**:
+
+1. Using APT (Ubuntu/Debian):
+   ```sh
+   sudo apt update && sudo apt install mysql-server -y
+   ```
+2. Using YUM (CentOS/RHEL):
+   ```sh
+   sudo yum install mysql-server -y
+   ```
+3. Start MySQL service:
+   ```sh
+   sudo service mysql start
+   ```
+
+#### Install Gradle
+
+**Windows**:
+
+1. Download and install from Gradle's website manually or use Chocolatey:
+   ```sh
+   choco install gradle -y
+   ```
+
+**Mac**:
+
+1. Using Homebrew:
+   ```sh
+   brew install gradle
+   ```
+
+**Linux**:
+
+1. Using SDKMAN:
+   ```sh
+   curl -s "https://get.sdkman.io" | bash
+   source "$HOME/.sdkman/bin/sdkman-init.sh"
+   sdk install gradle
+   ```
+
+These commands should help users quickly set up the required environment for the project on their respective platforms.
 
 ### Database Setup
 
@@ -30,7 +112,7 @@
    ./setup_mysql.sh
    ```
 
-This script will set up the MySQL database, user, schema, views, indexes, procedures, functions, and triggers.
+This script will start the mysql service in the background, and set up the MySQL database, user, schema, views, indexes, procedures, functions, and triggers.
 
 ### Application Setup
 
