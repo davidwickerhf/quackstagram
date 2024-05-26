@@ -11,11 +11,11 @@ public class DataSourceFactory {
 
     private Map<String, HikariDataSource> dataSources = new HashMap<>();
 
-    public DataSource getDataSource(String name) {
+    public HikariDataSource getDataSource(String name) {
         return dataSources.get(name);
     }
 
-    public DataSource createDataSource(String name, String jdbcUrl) {
+    public HikariDataSource createDataSource(String name, String jdbcUrl) {
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(jdbcUrl);
         // Additional configuration can be set here

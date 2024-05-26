@@ -1,19 +1,15 @@
 package net.group3.quackstagram.backend.database;
 
-import net.group3.quackstagram.backend.repositories.PictureRepository;
-import net.group3.quackstagram.backend.repositories.SQLPictureRepository;
-import net.group3.quackstagram.backend.repositories.SQLUserRepository;
-import net.group3.quackstagram.backend.repositories.UserRepository;
-import net.group3.quackstagram.models.Picture;
+import com.zaxxer.hikari.HikariDataSource;
+
+import net.group3.quackstagram.models.Post;
 import net.group3.quackstagram.models.User;
 
 public class DataFacade {
-    private UserRepository userRepository;
-    private PictureRepository pictureRepository;
+    private HikariDataSource dataSource;
 
     public DataFacade(DataSourceFactory dataSourceFactory) {
-        this.userRepository = new SQLUserRepository(dataSourceFactory.getDataSource("database"));
-        this.pictureRepository = new SQLPictureRepository(dataSourceFactory.getDataSource("database"));
+        this.dataSource = dataSourceFactory.getDataSource("database");
     }
 
     // User actions
@@ -25,11 +21,11 @@ public class DataFacade {
         throw new UnsupportedOperationException("Unimplemented method 'saveUser'");
     }
 
-    public Picture getPictureById(String id) {
+    public Post getPictureById(String id) {
         throw new UnsupportedOperationException("Unimplemented method 'getPictureById'");
     }
 
-    public void savePicture(Picture picture) {
+    public void savePicture(Post picture) {
         throw new UnsupportedOperationException("Unimplemented method 'savePicture'");
     }
 

@@ -2,11 +2,11 @@ package net.group3.quackstagram.models;
 
 import java.sql.Timestamp;
 
-public class Comment {
-    private Long commentId;
-    private String content;
-    private Long userId;
+public class Post {
     private Long postId;
+    private String content;
+    private String imagePath;
+    private Long userId;
     private Timestamp createdAt;
     private Timestamp updatedAt;
 
