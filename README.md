@@ -489,8 +489,6 @@ Post ||--o{ Like : "is liked"
 
 ## Profit Maximization Queries
 
-Based on the provided MySQL schema, here are the SQL queries to answer each of the questions:
-
 1. **List all users who have more than X followers where X can be any integer value.**
 
    ```sql
