@@ -1,0 +1,55 @@
+@startuml Quackstagram
+entity User {
+    + userId : BIGINT <<PK>>
+    --
+    username : VARCHAR(255)
+    email : VARCHAR(255)
+    hashedPassword : VARCHAR(255)
+    bio : TEXT
+    createdAt : TIMESTAMP
+    updatedAt : TIMESTAMP
+}
+
+entity Post {
+    + postId : BIGINT <<PK>>
+    --
+    content : TEXT
+    imagePath : TEXT
+    userId : BIGINT <<FK>>
+    createdAt : TIMESTAMP
+    updatedAt : TIMESTAMP
+}
+
+entity Comment {
+    + commentId : BIGINT <<PK>>
+    --
+    content : TEXT
+    userId : BIGINT <<FK>>
+    postId : BIGINT <<FK>>
+    createdAt : TIMESTAMP
+    updatedAt : TIMESTAMP
+}
+
+entity Like {
+    + likeId : BIGINT <<PK>>
+    --
+    userId : BIGINT <<FK>>
+    postId : BIGINT <<FK>>
+    createdAt : TIMESTAMP
+}
+
+entity Follow {
+    + id : BIGINT <<PK>>
+    --
+    followerId : BIGINT <<FK>>
+    followingId : BIGINT <<FK>>
+    createdAt : TIMESTAMP
+}
+
+User ||--o{ Post : "has"
+User ||--o{ Comment : "makes"
+User ||--o{ Like : "likes"
+User ||--o{ Follow : "follows"
+Post ||--o{ Comment : "has"
+Post ||--o{ Like : "is liked"
+@enduml
