@@ -6,10 +6,7 @@ import net.group3.quackstagram.backend.database.DataFacade;
 import net.group3.quackstagram.models.User;
 
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.sql.SQLException;
 
 public abstract class UI extends JFrame {
     protected static final int WIDTH = 300;
@@ -167,19 +164,7 @@ public abstract class UI extends JFrame {
     protected void openProfileUI() {
         // Open InstagramProfileUI frame
         this.dispose();
-        String loggedInUsername = "";
-
-        // Read the logged-in user's username from users.txt
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get("data", "users.txt"))) {
-            String line = reader.readLine();
-            if (line != null) {
-                loggedInUsername = line.split(":")[0].trim();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        User user = new User(loggedInUsername);
-        InstagramProfileUI profileUI = new InstagramProfileUI(user, this.data);
+        InstagramProfileUI profileUI = new InstagramProfileUI(this.loggedInUser, this.data);
         profileUI.setVisible(true);
     }
 

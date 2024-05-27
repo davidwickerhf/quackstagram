@@ -191,6 +191,28 @@ public class DataFacade {
         return posts;
     }
 
+    public List<Post> findPostsByUserId(Long userId) throws SQLException {
+        List<Post> posts = new ArrayList<>();
+        String sql = "SELECT * FROM Post WHERE userId = ?";
+        try (Connection connection = dataSource.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, userId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    Post post = new Post();
+                    post.setPostId(resultSet.getLong("postId"));
+                    post.setContent(resultSet.getString("content"));
+                    post.setImagePath(resultSet.getString("imagePath"));
+                    post.setUserId(resultSet.getLong("userId"));
+                    post.setCreatedAt(resultSet.getTimestamp("createdAt"));
+                    post.setUpdatedAt(resultSet.getTimestamp("updatedAt"));
+                    posts.add(post);
+                }
+            }
+        }
+        return posts;
+    }
+
     // Comment CRUD methods
     public void createComment(Comment comment) throws SQLException {
         String sql = "INSERT INTO Comment (content, userId, postId, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?)";
@@ -421,5 +443,72 @@ public class DataFacade {
             }
         }
         return follows;
+    }
+
+    public int getFollowersCount(Long userId) throws SQLException {
+        String sql = "SELECT COUNT(*) AS followersCount FROM Follow WHERE followingId = ?";
+        try (Connection connection = dataSource.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, userId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt("followersCount");
+                }
+            }
+        }
+        return 0;
+    }
+
+    public int getFollowingCount(Long userId) throws SQLException {
+        String sql = "SELECT COUNT(*) AS followingCount FROM Follow WHERE followerId = ?";
+        try (Connection connection = dataSource.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, userId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt("followingCount");
+                }
+            }
+        }
+        return 0;
+    }
+
+    public boolean isFollowing(Long followerId, Long followingId) throws SQLException {
+        String sql = "SELECT COUNT(*) AS count FROM Follow WHERE followerId = ? AND followingId = ?";
+        try (Connection connection = dataSource.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, followerId);
+            statement.setLong(2, followingId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt("count") > 0;
+                }
+            }
+        }
+        return false;
+    }
+
+    public void followUser(Long followerId, Long followingId) throws SQLException {
+        if (!isFollowing(followerId, followingId)) {
+            Follow follow = new Follow();
+            follow.setFollowerId(followerId);
+            follow.setFollowingId(followingId);
+            createFollow(follow);
+        }
+    }
+
+    // Method to get the total number of likes for a post
+    public int getPostLikeCount(Long postId) throws SQLException {
+        String sql = "SELECT COUNT(*) AS likeCount FROM `Like` WHERE postId = ?";
+        try (Connection connection = dataSource.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, postId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt("likeCount");
+                }
+            }
+        }
+        return 0;
     }
 }
